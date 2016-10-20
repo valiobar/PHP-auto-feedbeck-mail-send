@@ -12,12 +12,13 @@ if(!isset($_GET['customerID'])&&!isset($_GET['orderId'])&&!isset($_GET['mark']))
 join oc_customer as c
 on o.customer_id = c.customer_id
 where DATEDIFF(now(),o.date_added)=10
-order by o.date_added desc');
+and o.order_status_id = 5
+');
 $subject = "Оценка качеството на услугите на VIMAX";
     while ($row = $statement->fetch_assoc()) {
         mail(row[email],$subject, sendForm(name,row[customer_id],row[order_id]));
     }
- echo(sendForm(12,12,5));
+// echo(sendForm(12,12,2324));
 }
 else {
 
@@ -31,7 +32,7 @@ else {
     $statement->bind_param("iii",$customerID,$orderId,$mark);
 
     $statement->execute();
-
+    header('Location: '."http://vimax.bg/");
 }
 
 

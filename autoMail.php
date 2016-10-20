@@ -1,12 +1,13 @@
 <?php
 
+$db = new mysqli('localhost', 'root', '', 'vimaxspa_vimax');
+$db->set_charset("utf8");
+if ($db->connect_errno) {
+    die('Cannot connect to database');
+}
+
+
 if(!isset($_GET['customerID'])&&!isset($_GET['orderId'])&&!isset($_GET['mark'])) {
-  mail('valentin.barakov@gmail.com', "test", "testovo");
-    $db = new mysqli('localhost', 'root', '', 'vimaxspa_vimax');
-    $db->set_charset("utf8");
-    if ($db->connect_errno) {
-        die('Cannot connect to database');
-    }
     $statement = $db->query('select o.order_id,CONCAT(c.firstname," ",c.lastname) as name,c.email,c.telephone,c.customer_id FROM oc_order as o
 join oc_customer as c
 on o.customer_id = c.customer_id
@@ -16,15 +17,20 @@ $subject = "Оценка качеството на услугите на VIMAX";
     while ($row = $statement->fetch_assoc()) {
         mail(row[email],$subject, sendForm(name,row[customer_id],row[order_id]));
     }
-  //  echo(sendForm('asdas',base64_encode('asdas'),base64_encode('asdas'),base64_encode('asdas'),base64_encode('asdas'),$row[order_id]));
+ echo(sendForm(12,12,5));
 }
 else {
 
-    $name =base64_decode($_GET['name']);
+
     $customerID=$_GET['customerID'];
     $orderId= $_GET['orderID'];
     $mark =  $_GET['mark'];
-    echo(base64_decode($_GET[name]) . " " .($_GET[mark]));
+
+    $statement = $db->prepare("INSERT INTO feedback (customer_id,order_id,mark) VALUE (?,?,?)");
+
+    $statement->bind_param("iii",$customerID,$orderId,$mark);
+
+    $statement->execute();
 
 }
 

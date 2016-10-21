@@ -18,7 +18,7 @@ $subject = "Оценка качеството на услугите на VIMAX";
     while ($row = $statement->fetch_assoc()) {
         mail(row[email],$subject, sendForm(name,row[customer_id],row[order_id]));
     }
-// echo(sendForm(12,12,2324));
+ echo(sendForm(12,12,2324));
 }
 else {
 

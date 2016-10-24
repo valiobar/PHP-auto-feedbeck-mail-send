@@ -15,10 +15,14 @@ where DATEDIFF(now(),o.date_added)=10
 and o.order_status_id = 5
 ');
 $subject = "Оценка качеството на услугите на VIMAX";
+
+    $headers  = 'MIME-Version: 1.0' . "\r\n";
+    $headers .= 'Content-type: text/html; charset=UTF-8' . "\r\n";
+
     while ($row = $statement->fetch_assoc()) {
-        mail(row[email],$subject, sendForm(name,row[customer_id],row[order_id]));
+        mail($row[email],$subject, sendForm(name,row[customer_id],row[order_id]),$headers);
     }
- echo(sendForm(12,12,2324));
+
 }
 else {
 
@@ -27,7 +31,7 @@ else {
     $orderId= $_GET['orderID'];
     $mark =  $_GET['mark'];
 
-    $statement = $db->prepare("INSERT INTO feedback (customer_id,order_id,mark) VALUE (?,?,?)");
+    $statement = $db->prepare("INSERT INTO feedback (customer_id,order_id,mark) VALUES (?,?,?)");
 
     $statement->bind_param("iii",$customerID,$orderId,$mark);
 

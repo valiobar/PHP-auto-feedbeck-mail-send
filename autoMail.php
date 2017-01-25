@@ -1,17 +1,15 @@
 <?php
 
-$db = new mysqli('localhost', 'root', '', 'vimaxspa_vimax');
+$db = new mysqli('localhost', 'root', '', 'plastmar_aurokey');
 $db->set_charset("utf8");
 if ($db->connect_errno) {
     die('Cannot connect to database');
 }
 
 
-if(!isset($_GET['customerID'])&&!isset($_GET['orderId'])&&!isset($_GET['mark'])) {
-    $statement = $db->query('select o.order_id,CONCAT(c.firstname," ",c.lastname) as name,c.email,c.telephone,c.customer_id FROM oc_order as o
-join oc_customer as c
-on o.customer_id = c.customer_id
-where DATEDIFF(now(),o.date_added)=10
+if(!isset($_GET['orderId'])&&!isset($_GET['mark'])) {
+    $statement = $db->query('select o.order_id,CONCAT(o.firstname," ",o.lastname) as name,o.email,o.date_added FROM oc_order as o
+where DATEDIFF(now(),o.date_added)=0
 and o.order_status_id = 5
 ');
 $subject = "Оценка качеството на услугите на VIMAX";
@@ -20,20 +18,33 @@ $subject = "Оценка качеството на услугите на VIMAX";
     $headers .= 'Content-type: text/html; charset=UTF-8' . "\r\n";
 
     while ($row = $statement->fetch_assoc()) {
-        mail($row[email],$subject, sendForm(name,row[customer_id],row[order_id]),$headers);
+        mail($row[email],$subject, sendForm(row[name],row[customer_id],row[order_id]),$headers);
     }
 
 }
 else {
 
 
-    $customerID=$_GET['customerID'];
+
     $orderId= $_GET['orderID'];
     $mark =  $_GET['mark'];
+//    INSERT INTO feedback (customer_name,customer_email,order_id,mark) VALUES
+//    ((Select CONCAT(o.firstname," ",o.lastname) as name from oc_order as o where o.order_id =28 ),
+//(Select o.email  from oc_order as o where o.order_id =28)
+//,28,5 )
 
-    $statement = $db->prepare("INSERT INTO feedback (customer_id,order_id,mark) VALUES (?,?,?)");
 
-    $statement->bind_param("iii",$customerID,$orderId,$mark);
+     $getName = $db->query('Select CONCAT(o.firstname," ",o.lastname) as name from oc_order as o where o.order_id ='.$orderId);
+     $rowOne = $getName->fetch_assoc();
+     $customerName = $rowOne[name];
+     $getEmail = $db->query('Select o.email  from oc_order as o where o.order_id ='.$orderId);
+     $rowTwo = $getName->fetch_assoc();
+     $customerEmail = $rowTwo[email];
+
+
+    $statement = $db->prepare("INSERT INTO feedback (customer_name,customer_email,order_id,mark) VALUES (?,?,?,?)");
+
+    $statement->bind_param("ssii",$customerName,$customerEmail,$orderId,$mark);
 
     $statement->execute();
     header('Location: '."http://vimax.bg/");
@@ -43,10 +54,10 @@ else {
 
 
 
-function sendForm($name,$customerID,$orderId){
+function sendForm($name,$orderId){
 
     $form='';
-    $link ="http://localhost/public_html//autoMail.php?customerID=".$customerID."&orderID=".$orderId."&mark=";
+    $link ="http://localhost/public_html//autoMail.php?&orderID=".$orderId."&mark=";
     $form='<html xmlns="http://www.w3.org/1999/xhtml">
     
 <head>
